@@ -15,12 +15,27 @@ void AMovingPlatform::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!HasAuthority())
+	if (HasAuthority())
 	{
-		FVector Location = GetActorLocation();
-		Location += FVector(MovementSpeed * DeltaTime, 0.f, 0.f);
-		SetActorLocation(Location);
+		// Local -> Global
+
+		//GEngine->AddOnScreenDebugMessage(1, -1, FColor::Cyan, FString::Printf(TEXT("GlobalTargetLocation x : %f, y : %f, z : %f"), GlobalTargetLocation.X, GlobalTargetLocation.Y, GlobalTargetLocation.Z));
 		
+		FVector DirectionVector;
+		if (bIsTurn)
+		{
+			DirectionVector = (GlobalStartLocation - GlobalTargetLocation).GetSafeNormal();
+			Distance = (GlobalTargetLocation - GetActorLocation()).Length();
+		}
+		else
+		{
+			DirectionVector = (GlobalTargetLocation - GlobalStartLocation).GetSafeNormal();
+			Distance = (GlobalStartLocation - GetActorLocation()).Length();
+		}
+
+		SetActorLocation(GetActorLocation() + DirectionVector * DeltaTime * MovementSpeed);
+
+		if (Distance > (GlobalStartLocation - GlobalTargetLocation).Length()) bIsTurn = !bIsTurn;
 	}
 }
 
@@ -31,5 +46,8 @@ void AMovingPlatform::BeginPlay()
 	{
 		SetReplicates(true);
 		SetReplicateMovement(true);
+		GlobalStartLocation = GetActorLocation();
+		GlobalTargetLocation = GetTransform().TransformPosition(TargetLocation);
+		Distance = (GlobalTargetLocation - GlobalStartLocation).Length();
 	}
 }

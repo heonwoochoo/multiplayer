@@ -22,6 +22,18 @@ public:
 	virtual void BeginPlay() override;
 
 public:
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MovementSpeed = 10.f;
+
+	UPROPERTY(EditAnywhere, Meta = (MakeEditWidget = true))
+	FVector TargetLocation;
+
+	FVector GlobalTargetLocation;
+	FVector GlobalStartLocation;
+
+	bool bIsTurn = false;
+
+	UPROPERTY(VisibleAnywhere)
+	float Distance;
 };
